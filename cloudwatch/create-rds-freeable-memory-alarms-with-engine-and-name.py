@@ -32,12 +32,11 @@ for instance in response['DBInstances']:
 
     # Obtém a memória total da instância
     instance_memory = instance['AllocatedStorage'] * 1.024 ** 3
-
     # Calcula o limite de memória de 20%
     percent_memory_use = 0.2 * instance_memory
 
     # Cria o alerta de CPU com o nome composto
-    alarm_name = f"RDS-{rds_engine}-{instance_name}-CPUUtilization"
+    alarm_name = f"RDS-{rds_engine}-{instance_name}-FreeableMemory"
 
     # Cria o alerta de CPU
     cloudwatch_client = boto3.client('cloudwatch', region_name=region)
@@ -48,9 +47,9 @@ for instance in response['DBInstances']:
         Namespace="AWS/RDS",
         Statistic="Average",
         Dimensions=[{'Name': 'DBInstanceIdentifier', 'Value': instance_id}],
-        ComparisonOperator="GreaterThanOrEqualToThreshold",
+        ComparisonOperator="LessThanOrEqualToThreshold",
         Period=300,
-        Threshold=percent_memory_use,
+        Threshold=150000000,
         EvaluationPeriods=2,
         AlarmActions=[sns_topic_arn]
     )
